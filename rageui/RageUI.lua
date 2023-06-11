@@ -488,13 +488,13 @@ function RageUI.Pool()
     end
 end
 
-Citizen.CreateThread(function()
+CreateThread(function()
     while true do
         RageUI.PoolMenus.Timer = 250
         if RageUI.PoolMenus.Name ~= nil then
             RageUI.PoolMenus[RageUI.PoolMenus.Name]()
         end
-        Citizen.Wait(RageUI.PoolMenus.Timer)
+        Wait(RageUI.PoolMenus.Timer)
         if RageUI.PoolMenus.Timer == 250 then
             RageUI.PoolMenus.Name = nil
             RageUI.Pool();

@@ -5,49 +5,49 @@ local function setupMenu(group)
 		if Config.functionsBlacklist[id] then
 			return Config.functionsBlacklist[id][group]
 		end
-	
+
 		return false
 	end
 
 	local function toKeyValues( tbl )
 
 		local result = {}
-	
+
 		for k,v in pairs( tbl ) do
 			table.insert( result, { key = k, val = v } )
 		end
-	
+
 		return result
-	
+
 	end
 
 	local function keyValuePairs( state )
 
 		state.Index = state.Index + 1
-	
+
 		local keyValue = state.KeyValues[ state.Index ]
 		if ( not keyValue ) then return end
-	
+
 		return keyValue.key, keyValue.val
-	
+
 	end
-	
+
 	local function sortedPairs( pTable, Desc )
-	
+
 		local sortedTbl = toKeyValues( pTable )
-	
+
 		if ( Desc ) then
 			table.sort( sortedTbl, function( a, b ) return a.key > b.key end )
 		else
 			table.sort( sortedTbl, function( a, b ) return a.key < b.key end )
 		end
-	
+
 		return keyValuePairs, { Index = 0, KeyValues = sortedTbl }
-	
+
 	end
 
 	local target = true
-	
+
 	local function isTargetingPlayer(menuName)
 		return menuName == Translations["sectionManagePlayers"] and target or false
 	end
@@ -56,13 +56,13 @@ local function setupMenu(group)
 	local subMenus = {}
 
 	local subMenuTargeted = false
-	
+
 	for _, subMenuType in ipairs(Sections) do
 		if not subMenuType.disable then
 			subMenus[#subMenus + 1] = { name = subMenuType.name, menu = RageUI.CreateSubMenu(menu, subMenuType.name, Translations["menuSubtitle"]), functions = subMenuType.functions, variables = {} }
 		end
 	end
-	
+
 	local justChangedMenu = false
 	local onlinePlayers = {}
 
@@ -78,7 +78,7 @@ local function setupMenu(group)
 								onlinePlayers = players
 							end)
 						end
-						
+
 			--			print("open subMenu with name= " .. subMenu.name)
 						subMenuTargeted = false
 						RageUI.Visible(menu, false)
@@ -115,7 +115,7 @@ local function setupMenu(group)
 									if onSelected and not justChangedMenu then
 									--	print("CHECKBOX SELECTED: " .. action.name)
 										subMenu.variables[action.name] = isChecked
-	
+
 										if not targetingPlayer then
 											return ESX.TriggerServerCallback("star_adminmenu:logDiscord", function()
 												action.trigger(PlayerPedId(), subMenu.variables[action.name], PlayerId())
@@ -136,7 +136,7 @@ local function setupMenu(group)
 								if not subMenu.variables[action.name] then
 									subMenu.variables[action.name] = 1
 								end
-	
+
 								items:AddList(action.name, mapOnLabels(action.values), subMenu.variables[action.name], nil, { IsDisabled = false }, function(currentIndex, onSelected, onListChange)
 									if onListChange and not justChangedMenu then
 										subMenu.variables[action.name] = currentIndex
@@ -150,7 +150,7 @@ local function setupMenu(group)
 												action.trigger(PlayerPedId(), value, PlayerId())
 											end, action.name, false, value)
 										end
-										
+
 										ESX.TriggerServerCallback("star_adminmenu:logDiscord", function()
 											action.trigger(PlayerPedId(), target, value)
 										end, action.name, target, value)
@@ -166,7 +166,7 @@ local function setupMenu(group)
 												action.trigger(PlayerPedId(), PlayerId())
 											end, action.name, false)
 										end
-										
+
 										ESX.TriggerServerCallback("star_adminmenu:logDiscord", function()
 											action.trigger(PlayerPedId(), target)
 										end, action.name, target)
@@ -177,7 +177,7 @@ local function setupMenu(group)
 					end
 				end
 
-				
+
 			end, function() end)
 		end
 	end
@@ -214,19 +214,19 @@ local function setupMenu(group)
 							end, action.name, target, value)
 						end })
 					else
-						targetMenu:AddButton({ label = action.name, select = function() 
+						targetMenu:AddButton({ label = action.name, select = function()
 							ESX.TriggerServerCallback("star_adminmenu:logDiscord", function()
 								action.trigger(PlayerPedId(), target)
 							end, action.name, target)
-						end })	
+						end })
 					end
 				end
 			end
-			
+
 			subMenu:On("open", function (menu)
 				ESX.TriggerServerCallback("star_adminmenu:getAllPlayers", function(players)
 					menu:ClearItems()
-					
+
 					for k, player in pairs(players) do
 						menu:AddButton({ label = ('%s [ID: %s]'):format(player.name, k), value = targetMenu, select = function()
 							target = player
@@ -250,11 +250,11 @@ local function setupMenu(group)
 							end, action.name, false, value)
 						end })
 					else
-						subMenu:AddButton({ label = action.name, select = function() 
+						subMenu:AddButton({ label = action.name, select = function()
 							ESX.TriggerServerCallback("star_adminmenu:logDiscord", function()
 								action.trigger(PlayerPedId(), PlayerId())
 							end, action.name)
-						end })	
+						end })
 					end
 				end
 			end
@@ -272,23 +272,23 @@ local hasBeenInitialized
 
 local function initialize()
 	if hasBeenInitialized then return end
-		
+
 	hasBeenInitialized = true
 
-    Citizen.CreateThread(function ()
+    CreateThread(function ()
         while not Config do
-            Citizen.Wait(0)
+            Wait(0)
         end
-    
+
         while not Sections do
-            Citizen.Wait(0)
+            Wait(0)
         end
 
         ESX.TriggerServerCallback("star_adminmenu:hasMenuAccess", function(data)
             if not data.hasAccess then return end
-    
+
             setupMenu(data.group)
-        end)     
+        end)
     end)
 end
 

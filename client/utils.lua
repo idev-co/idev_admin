@@ -2,13 +2,13 @@ function mapOnLabels(map)
     local result = {}
 
     for _, v in pairs(map) do
-        result[#result + 1] = v.label 	
+        result[#result + 1] = v.label
     end
 
     return result
 end
 
-function getValueFromMap(map, index) 
+function getValueFromMap(map, index)
     return map[index].value
 end
 
@@ -20,7 +20,7 @@ function CreateText(text)
 	SetTextCentre(false)
 	SetTextDropshadow(0, 0, 0, 0, 255)
 	SetTextEdge(1, 0, 0, 0, 205)
-    
+
 	BeginTextCommandDisplayText("STRING")
 	AddTextComponentSubstringPlayerName(text)
 	EndTextCommandDisplayText(0.45, 0.03)
@@ -32,15 +32,15 @@ function CreateKeyboardInput(entryTitle, textEntry, inputText, maxLength)
 	DisplayOnscreenKeyboard(1, entryTitle, '', inputText, '', '', '', maxLength)
 
 	while UpdateOnscreenKeyboard() ~= 1 and UpdateOnscreenKeyboard() ~= 2 do
-		Citizen.Wait(0)
+		Wait(0)
 	end
 
 	if UpdateOnscreenKeyboard() ~= 2 then
 		local result = GetOnscreenKeyboardResult()
-		Citizen.Wait(500)
+		Wait(500)
 		return result
 	else
-		Citizen.Wait(500)
+		Wait(500)
 		return nil
 	end
 end
@@ -55,11 +55,11 @@ end
 function GetCameraDirection()
 	local heading = GetGameplayCamRelativeHeading()+GetEntityHeading(GetPlayerPed(-1))
 	local pitch = GetGameplayCamRelativePitch()
-  
+
 	local x = -math.sin(heading*math.pi/180.0)
 	local y = math.cos(heading*math.pi/180.0)
 	local z = math.sin(pitch*math.pi/180.0)
-  
+
 	local len = math.sqrt(x*x+y*y+z*z)
 
 	if len ~= 0 then
@@ -67,7 +67,7 @@ function GetCameraDirection()
 		y = y / len
 		z = z / len
 	end
-  
+
 	return x,y,z
 end
 
@@ -81,12 +81,12 @@ function SetupScaleform(scaleform, speedIndex)
     local scaleform = RequestScaleformMovie(scaleform)
 
     while not HasScaleformMovieLoaded(scaleform) do
-        Citizen.Wait(1)
+        Wait(1)
     end
 
     BeginScaleformMovieMethod(scaleform, "CLEAR_ALL")
     EndScaleformMovieMethod()
-    
+
     BeginScaleformMovieMethod(scaleform, "SET_CLEAR_SPACE")
     ScaleformMovieMethodAddParamInt(200)
     EndScaleformMovieMethod()

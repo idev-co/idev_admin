@@ -1,4 +1,4 @@
---[[ 
+--[[
 
     Able the code to be more efficient (~10% faster than the usual, depends on the iteration and other metrics)
     I won't do it for all in order to avoid too much memory used on client's side
@@ -15,7 +15,7 @@ local recordTypes = {
     [2] = "Ban"
 }
 
-function RageUI.PoolMenus:star_adminmenu_custom()
+function RageUI.PoolMenus:AdminMenu()
     customMenu:IsVisible(function(items)
         for _, data in pairs(customData) do
             items:AddButton(data.name, data.description, { IsDisabled = false }, function(onSelected)
@@ -24,7 +24,7 @@ function RageUI.PoolMenus:star_adminmenu_custom()
     end, function() end)
 end
 
-Citizen.CreateThread(function ()
+CreateThread(function ()
     -- TODO: clenup tempory variable to table like events file
     local isUsingSuperJump, isShowingCoords, isShowingTargetCoords, isShowingBlips, isShowingNames, isAutoRepairing, isUsingNoclip, isSpectating
     local playersBlips, playersNames = {}, {}
@@ -47,7 +47,7 @@ Citizen.CreateThread(function ()
                         SetEntityInvincible(player, checked)
                         SetPedCanRagdoll(player, not checked)
                         SetEntityCanBeDamaged(player, not checked)
-    
+
                         NotifyAction(translate["actionGodmode"], checked)
                     end
                 },
@@ -58,7 +58,7 @@ Citizen.CreateThread(function ()
                     type = "checkbox",
                     trigger = function (player, checked)
                         SetEntityVisible(player, not checked)
-    
+
                         NotifyAction(translate["actionInvisible"], checked)
                     end
                 },
@@ -69,7 +69,7 @@ Citizen.CreateThread(function ()
                     type = "checkbox",
                     trigger = function (player, checked)
                         FreezeEntityPosition(player, checked)
-    
+
                         NotifyAction(translate["actionFreezePlayer"], checked)
                     end
                 },
@@ -83,7 +83,7 @@ Citizen.CreateThread(function ()
                         for status, value in pairs(Config.actions["healPlayer"]) do
                             TriggerEvent(Config.triggers["esxStatusSet"], status, value)
                         end
-    
+
                         NotifyAction(translate["actionHealPlayer"])
                     end
                 },
@@ -111,7 +111,7 @@ Citizen.CreateThread(function ()
                             while isUsingSuperJump do
                                 SetSuperJumpThisFrame(playerID)
 
-                                Citizen.Wait(0)
+                                Wait(0)
                             end
                         end
                     end
@@ -139,8 +139,8 @@ Citizen.CreateThread(function ()
                             while isShowingCoords do
                                 local coords = GetEntityCoords(player, false)
                                 CreateText((translate["extraShowCoords"]):format(ESX.Math.Round(coords.x, 3), ESX.Math.Round(coords.y, 3), ESX.Math.Round(coords.z, 3), ESX.Math.Round(GetEntityPhysicsHeading(player), 3)))
-                                
-                                Citizen.Wait(1)
+
+                                Wait(1)
                             end
                         end
                     end
@@ -153,7 +153,7 @@ Citizen.CreateThread(function ()
                         for _, v in pairs(Config.weaponsList) do
                             GiveWeaponToPed(player, v, 99999, false, false)
                         end
-    
+
                         NotifyAction(translate["actionGiveAllWeapons"])
                     end
                 },
@@ -173,11 +173,11 @@ Citizen.CreateThread(function ()
                     name = translate["actionTeleportToWaypoint"],
                     trigger = function (player)
                         local waypoint = GetFirstBlipInfoId(8)
-    
-                        if not DoesBlipExist(waypoint) then 
+
+                        if not DoesBlipExist(waypoint) then
                             return NotifyAction(false, false, translate["errorNoMarkerOnMap"])
                         end
-    
+
                         local waypointCoords = GetBlipInfoIdCoord(waypoint)
                         local foundGround, zCoord, zPos = false, -500.0, 0.0
 
@@ -185,14 +185,14 @@ Citizen.CreateThread(function ()
                             zCoord = zCoord + 10.0
 
                             RequestCollisionAtCoord(waypointCoords.x, waypointCoords.y, zCoord)
-                            Citizen.Wait(0)
-                            
+                            Wait(0)
+
                             foundGround, zPos = GetGroundZFor_3dCoord(waypointCoords.x, waypointCoords.y, zCoord)
-                            
+
                             if not foundGround and zCoord >= 2000.0 then
                                 foundGround = true
                             end
-                            
+
                         end
 
                         SetPedCoordsKeepVehicle(player, waypointCoords.x, waypointCoords.y, zPos)
@@ -236,15 +236,15 @@ Citizen.CreateThread(function ()
                     trigger = function ()
                         isShowingBlips = not isShowingBlips
                         NotifyAction(translate["actionShowBlips"], isShowingBlips)
-    
+
                         if not isShowingBlips then
                             for _, blip in pairs(playersBlips) do
                                 RemoveBlip(blip)
                             end
-                            
+
                             playersBlips = {}
 
-                            return 
+                            return
                         end
 
                         -- Neeeded for Onesync in order to update the loaded players around the ped, yes it's ugly :/
@@ -252,23 +252,23 @@ Citizen.CreateThread(function ()
                             for _, player in pairs(GetActivePlayers()) do
                                 local playerPed = GetPlayerPed(player)
                                 local blip = AddBlipForEntity(playerPed)
-                                
+
                                 SetBlipSprite(blip, 1)
                                 SetBlipScale(blip, 0.85)
                                 SetBlipRotation(blip, math.ceil(GetEntityHeading(playerPed)))
                                 SetBlipNameToPlayerName(blip, player)
                                 ShowHeadingIndicatorOnBlip(blip, true)
                                 SetBlipAsShortRange(blip, false)
-                                
+
                                 playersBlips[player] = blip
                             end
 
                             Wait(10000)
-                            
+
                             for _, blip in pairs(playersBlips) do
                                 RemoveBlip(blip)
                             end
-                            
+
                             playersBlips = {}
                         end
                     end
@@ -280,14 +280,14 @@ Citizen.CreateThread(function ()
                     trigger = function (player)
                         isShowingNames = not isShowingNames
                         NotifyAction(translate["actionShowNames"], isShowingNames)
-    
+
                         if not isShowingNames then
                             for _, v in pairs(playersNames) do
                                 RemoveMpGamerTag(v)
                             end
-    
+
                             playersNames = {}
-                            return 
+                            return
                         end
 
                         -- Neeeded for Onesync in order to update the loaded players around the ped, yes it's ugly :/
@@ -295,7 +295,7 @@ Citizen.CreateThread(function ()
                             for _, v in pairs(GetActivePlayers()) do
                                 local playerPed = GetPlayerPed(v)
                                 if playerPed == player then return end
-        
+
                                 playersNames[v] = CreateFakeMpGamerTag(playerPed, (translate["extraShowNames"]):format(GetPlayerServerId(v), GetPlayerName(v)), false, false, '', 0)
                             end
 
@@ -311,7 +311,7 @@ Citizen.CreateThread(function ()
                         isUsingNoclip = not isUsingNoclip
 
                         ClearPedTasksImmediately(player)
-                        
+
                         SetEntityCollision(player, not isUsingNoclip, not isUsingNoclip)
                         FreezeEntityPosition(player, isUsingNoclip)
                         SetEntityInvincible(player, isUsingNoclip)
@@ -322,13 +322,13 @@ Citizen.CreateThread(function ()
                         SetPoliceIgnorePlayer(player, isUsingNoclip)
 
                         NotifyAction(translate["actionNoclip"], isUsingNoclip)
-                        
+
                         if isUsingNoclip then
                             while isUsingNoclip do
                                 SetEntityVisible(player, false)
                                 SetLocalPlayerVisibleLocally(true)
                                 SetEntityAlpha(player, isUsingNoclip and 50 or 255, false)
-                                
+
                                 DrawScaleformMovieFullscreen(noclipButtons)
                                 DisableActionControls()
 
@@ -339,13 +339,13 @@ Citizen.CreateThread(function ()
 
                                 if IsControlJustPressed(1, Config.actions["noclip"]["controls"].adjustSpeed) then
                                     speedIndex = speedIndex + 1
-    
+
                                     if speedIndex > #Config.actions["noclip"].speed then
                                         speedIndex = 1
                                     end
-    
+
                                     currentSpeed = Config.actions["noclip"].speed[speedIndex].speed
-    
+
                                     SetupScaleform("instructional_buttons", speedIndex)
                                 end
 
@@ -364,7 +364,7 @@ Citizen.CreateThread(function ()
                                 SetEntityCoordsNoOffset(player, x, y, z, true, true, true)
                                 SetEntityRotation(player, 0.0, 0.0, GetGameplayCamRot(0).z)
 
-                                Citizen.Wait(1)
+                                Wait(1)
                             end
                         end
                     end
@@ -401,7 +401,7 @@ Citizen.CreateThread(function ()
                         ESX.TriggerServerCallback("star_adminmenu:triggerAction", function(coords)
                             RequestCollisionAtCoord(coords.x, coords.y, coords.z)
                             SetPedCoordsKeepVehicle(player, coords.x, coords.y, coords.z)
-    
+
                             NotifyAction(translate["actionTeleportToPlayer"])
                         end, "getCoords", target.source)
                     end
@@ -432,17 +432,17 @@ Citizen.CreateThread(function ()
                     type = "checkbox",
                     trigger = function (player, target)
                         isSpectating = not isSpectating
-                        
+
                         -- avoid sync problems
                         Wait(50)
-                        
+
                         NotifyAction(translate["actionSpectateTarget"], isSpectating)
-                        
+
                         FreezeEntityPosition(player, isSpectating)
-    
+
                         if not isSpectating then
                             SetEntityCoords(player, lastCoords)
-                            
+
                             ClearPedBloodDamage(player)
                             ClearPedEnvDirt(player)
                             ResetPedVisibleDamage(player)
@@ -453,24 +453,24 @@ Citizen.CreateThread(function ()
                         SetEntityCollision(player, not isSpectating, not isSpectating)
                         SetPedCanRagdoll(player, not isSpectating)
                         SetEntityCanBeDamaged(player, not isSpectating)
-                    
+
                         if not isSpectating then return end
 
                         lastCoords = GetEntityCoords(player)
-                    
+
                         ESX.TriggerServerCallback("star_adminmenu:triggerAction", function(coords)
                             while not HasCollisionLoadedAroundEntity(player) do
-                                Citizen.Wait(0)
+                                Wait(0)
                                 RequestCollisionAtCoord(coords.x, coords.y, coords.z)
                             end
 
                             SetEntityCoords(player, coords.x, coords.y, coords.z)
-                
+
                             local targetSpectate
-                
+
                             -- Because network entity client and server doesn't share the same ID on OneSync Inifinity
                             while not targetSpectate do
-                                Citizen.Wait(1)
+                                Wait(1)
 
                                 for _, v in pairs(GetActivePlayers()) do
                                     if NetworkIsPlayerActive(v) then
@@ -480,10 +480,10 @@ Citizen.CreateThread(function ()
                                     end
                                 end
                             end
-                
+
                             while isSpectating do
-                                Citizen.Wait(1)
-                
+                                Wait(1)
+
                                 if targetSpectate then
                                     local targetPed = GetPlayerPed(targetSpectate)
                                     local coords = GetEntityCoords(targetPed)
@@ -491,12 +491,12 @@ Citizen.CreateThread(function ()
                                     if IsPedInAnyVehicle(targetPed) then
                                         SetEntityNoCollisionEntity(GetVehiclePedIsIn(targetPed, false), player, true)
                                     end
-                                    
+
                                     SetEntityNoCollisionEntity(targetSpectate, player, true)
                                     RequestCollisionAtCoord(coords.x, coords.y, coords.z)
                                     SetEntityCoords(player, coords.x, coords.y, coords.z)
                                 end
-                            end 
+                            end
                         end, "getCoords", target.source)
                     end
                 },
@@ -513,8 +513,8 @@ Citizen.CreateThread(function ()
                             ESX.TriggerServerCallback("star_adminmenu:triggerAction", function(coords, heading)
                                 while isShowingTargetCoords do
                                     CreateText((translate["extraShowCoords"]):format(ESX.Math.Round(coords.x, 3), ESX.Math.Round(coords.y, 3), ESX.Math.Round(coords.z, 3), ESX.Math.Round(heading, 3)))
-                                    
-                                    Citizen.Wait(1)
+
+                                    Wait(1)
                                 end
                             end, "getCoords", target.source)
                         end
@@ -562,8 +562,8 @@ Citizen.CreateThread(function ()
                         if not grade then return end
 
                         ESX.TriggerServerCallback("star_adminmenu:triggerAction", function(success)
-                            if not success then 
-                                return NotifyAction(false, false, translate["errorJobNotFound"]) 
+                            if not success then
+                                return NotifyAction(false, false, translate["errorJobNotFound"])
                             end
 
                             NotifyAction(translate["actionSetTargetJob"])
@@ -676,7 +676,7 @@ Citizen.CreateThread(function ()
                             end
 
                             customData = {}
-                            
+
                             for _, record in pairs(data) do
                                 customData[#customData + 1] = {
                                     name = ("[#%s] %s"):format(record.idban, recordTypes[record.type]),
@@ -685,7 +685,7 @@ Citizen.CreateThread(function ()
                                         (record.firstname .. " " .. record.lastname),
                                         record.created_at,
                                         record.ended_at
-                                    ) 
+                                    )
                                 }
                             end
 
@@ -742,8 +742,8 @@ Citizen.CreateThread(function ()
                         if not grade then return end
 
                         ESX.TriggerServerCallback("star_adminmenu:triggerAction", function(success)
-                            if not success then 
-                                return NotifyAction(false, false, translate["errorJobNotFound"]) 
+                            if not success then
+                                return NotifyAction(false, false, translate["errorJobNotFound"])
                             end
 
                             NotifyAction(translate["actionSetTargetJob2"])
@@ -793,7 +793,7 @@ Citizen.CreateThread(function ()
                     name = translate["actionFixVehicle"],
                     trigger = function (player)
                         if not IsPedInAnyVehicle(player) then return NotifyAction(false, false, Translations["errorNoVehiclePedIn"]) end
-    
+
                         local vehicle = GetVehiclePedIsUsing(player)
                         RepairVehicle(vehicle)
 
@@ -807,7 +807,7 @@ Citizen.CreateThread(function ()
                     type = "checkbox",
                     trigger = function (player, checked)
                         if not IsPedInAnyVehicle(player) then return NotifyAction(false, false, translate["errorNoVehiclePedIn"]) end
-    
+
                         local vehicle = GetVehiclePedIsUsing(player)
                         SetEntityInvincible(vehicle, checked)
                         SetVehicleStrong(vehicle, checked)
@@ -821,7 +821,7 @@ Citizen.CreateThread(function ()
                     name = translate["actionRemoveVehicle"],
                     trigger = function (player)
                         if not IsPedInAnyVehicle(player) then return NotifyAction(false, false, translate["errorNoVehiclePedIn"]) end
-    
+
                         DeleteEntity(GetVehiclePedIsUsing(player))
 
                         NotifyAction(translate["actionRemoveVehicle"])
@@ -833,7 +833,7 @@ Citizen.CreateThread(function ()
                     name = translate["actionSetPlateVehicle"],
                     trigger = function (player)
                         if not IsPedInAnyVehicle(player) then return NotifyAction(false, false, translate["errorNoVehiclePedIn"]) end
-    
+
                         local plate = CreateKeyboardInput("star_adminmenu_setplate", translate["extraSetPlate"], "", 8)
                         if not plate then return end
 
@@ -861,7 +861,7 @@ Citizen.CreateThread(function ()
                     },
                     trigger = function (player, value)
                         if not IsPedInAnyVehicle(player) then return NotifyAction(false, false, translate["errorNoVehiclePedIn"]) end
-                        
+
                         ModifyVehicleTopSpeed(GetVehiclePedIsUsing(player), value)
 
                         NotifyAction(translate["actionSetPowerVehicle"])
@@ -874,11 +874,11 @@ Citizen.CreateThread(function ()
                     type = "checkbox",
                     trigger = function (player)
                         if not IsPedInAnyVehicle(player) then return NotifyAction(false, false, translate["errorNoVehiclePedIn"]) end
-                        
+
                         isAutoRepairing = not isAutoRepairing
 
                         NotifyAction(translate["actionSetAutoRepairVehicle"], isAutoRepairing)
-                    
+
                         if isAutoRepairing then
                             while isAutoRepairing do
                                 if IsPedInAnyVehicle(player) then
@@ -889,7 +889,7 @@ Citizen.CreateThread(function ()
                                     end
                                 end
 
-                                Citizen.Wait(1)
+                                Wait(1)
                             end
                         end
                     end
