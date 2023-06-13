@@ -57,7 +57,7 @@ CreateThread(function ()
                     name = translate["actionInvisible"],
                     type = "checkbox",
                     trigger = function (player, checked)
-                        SetEntityVisible(player, not checked)
+                        SetEntityVisible(player, not checked, false)
 
                         NotifyAction(translate["actionInvisible"], checked)
                     end
@@ -187,7 +187,7 @@ CreateThread(function ()
                             RequestCollisionAtCoord(waypointCoords.x, waypointCoords.y, zCoord)
                             Wait(0)
 
-                            foundGround, zPos = GetGroundZFor_3dCoord(waypointCoords.x, waypointCoords.y, zCoord)
+                            foundGround, zPos = GetGroundZFor_3dCoord(waypointCoords.x, waypointCoords.y, zCoord, false)
 
                             if not foundGround and zCoord >= 2000.0 then
                                 foundGround = true
@@ -325,7 +325,7 @@ CreateThread(function ()
 
                         if isUsingNoclip then
                             while isUsingNoclip do
-                                SetEntityVisible(player, false)
+                                SetEntityVisible(player, false, false)
                                 SetLocalPlayerVisibleLocally(true)
                                 SetEntityAlpha(player, isUsingNoclip and 50 or 255, false)
 

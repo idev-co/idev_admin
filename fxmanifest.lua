@@ -8,8 +8,8 @@ shared_scripts {
     '@es_extended/imports.lua', -- only if your using ESX-Legacy !
     --'languages/english.lua',
     'languages/french.lua',
-    'config.lua', 
-} 
+    'config.lua',
+}
 
 client_scripts {
 
@@ -34,13 +34,7 @@ client_scripts {
 }
 
 server_scripts {
-    "@mysql-async/lib/MySQL.lua", -- if you are using oxmysql, just replace mysql-async by oxmysql
+    "@oxmysql/lib/MySQL.lua",
     'server/functions.lua',
     'server/main.lua'
-}
-
-escrow_ignore {
-    'rageui/**',
-    'config.lua',
-    'languages/**'
 }

@@ -12,8 +12,8 @@ local events = {
 
         FreezeEntityPosition(playerPed, eventVariables["freeze"])
 
-        if not IsPedInAnyVehicle(playerPed) then return end
-        
+        if not IsPedInAnyVehicle(playerPed, false) then return end
+
         FreezeEntityPosition(GetVehiclePedIsUsing(playerPed), eventVariables["freeze"])
     end,
     ["setWeather"] = function(data)
@@ -49,6 +49,6 @@ local events = {
 RegisterNetEvent("star_adminmenu:receiveEvents")
 AddEventHandler("star_adminmenu:receiveEvents", function (action, data)
     if not events[action] then return end
-    
+
     events[action](data)
 end)

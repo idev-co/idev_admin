@@ -21,7 +21,7 @@ ESX.RegisterServerCallback('star_adminmenu:triggerAction', function(source, call
 
 	if not hasMenuAccess(xPlayer.getGroup()) then return end
 	if not Functions[action] then return end
-    
+
     local blacklist = Config.functionsBlacklist[action]
     if blacklist and blacklist[xPlayer.getGroup()] then return end
 
@@ -42,7 +42,7 @@ ESX.RegisterServerCallback("star_adminmenu:getAllPlayers", function(source, call
 
 	for _, player in pairs(GetPlayers()) do
 		local ped = GetPlayerPed(player)
-        local PLAYER = ESX.GetPlayerFromId(player) 
+        local PLAYER = ESX.GetPlayerFromId(player)
 		if Config.esxLegacy then
             players[tonumber(player)] = { name = GetPlayerName(player), ped = ped, coords = GetEntityCoords(ped), source = player}
         else
@@ -71,11 +71,11 @@ ESX.RegisterServerCallback("star_adminmenu:logDiscord", function(source, callbac
     end
 
     PerformHttpRequest(
-        Config.discord["webhookURL"], 
+        Config.discord["webhookURL"],
         function()
-            callback() 
-        end, 
-        "POST", 
+            callback()
+        end,
+        "POST",
         json.encode({ username = Config.discord["username"], embeds = {
             {
                 ["color"] = Config.discord["color"],
@@ -101,8 +101,8 @@ AddEventHandler("playerConnecting", function(_, _, connection)
             identifier = identifier:gsub("%" .. toFind, "")
 
             -- TODO: voir pour vérifier la date si elle est passé ou non dans la query
-			local record = MySQL.Sync.fetchAll("SELECT `reason`, `ended_at` FROM `star_adminmenu_records` WHERE `type` = 2 AND `user` = @user", { 
-                ["@user"] = identifier
+			local record = MySQL.query.await("SELECT `reason`, `ended_at` FROM `adminmenu_records` WHERE `type` = 2 AND `user` = ?", {
+                identifier
             })[1]
 
 			if not record then return end

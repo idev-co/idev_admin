@@ -6,13 +6,13 @@ CreateThread(function()
     Functions = {
         ["getCoords"] = function (_, target)
             local ped = GetPlayerPed(target)
-            
+
             return GetEntityCoords(ped), GetEntityHeading(ped)
         end,
         ["setWeather"] = function(_, weather)
           TriggerClientEvent("star_adminmenu:receiveEvents", -1, "setWeather", weather)
         end,
-        ["setBlackout"] = function() 
+        ["setBlackout"] = function()
           TriggerClientEvent('star_adminmenu:receiveEvents', -1, "setBlackout")
         end,
         ["bring"] = function(source, target)
@@ -31,7 +31,7 @@ CreateThread(function()
             else
                 xTarget = ESX.GetPlayerFromId(target)
             end
-            
+
             if not xTarget then return end
 
 
@@ -86,7 +86,7 @@ CreateThread(function()
             if not data then return end
 
             xTarget.setGroup(data.rank)
-            
+
             return true
         end,
         ["addRecord"] = function (player, target, data)
@@ -108,15 +108,15 @@ CreateThread(function()
                 end
             end
 
-            MySQL.Sync.execute("INSERT INTO `star_adminmenu_records` (`user`, `staff`, `reason`, `created_at`, `type`, `ended_at`) VALUES (@user, @staff, @reason, @createdAt, @type, @endedAt)", {
-                ["@user"] = xTarget.getIdentifier(),
-                ["@staff"] = xPlayer.getIdentifier(),
-                ["@reason"]= data.reason,
-                ["@createdAt"] = os.date("%Y-%m-%d %H:%M:%S"),
-                ["@type"] = data.type,
-                ["@endedAt"] = endedAt
+            MySQL.insert.await("INSERT INTO `adminmenu_records` (`user`, `staff`, `reason`, `created_at`, `type`, `ended_at`) VALUES (?, ?, ?, ?, ?, ?)", {
+                xTarget.getIdentifier(),
+                xPlayer.getIdentifier(),
+                data.reason,
+                os.date("%Y-%m-%d %H:%M:%S"),
+                data.type,
+                endedAt
             })
-            
+
             return true
         end,
         ["kickAll"] = function (_, _, data)
@@ -124,8 +124,8 @@ CreateThread(function()
 
             for _, player in pairs(GetPlayers()) do
                 DropPlayer(player, data.reason)
-            end 
-            
+            end
+
             return true
         end,
         ["reviveAll"] = function (source, target)
@@ -139,9 +139,9 @@ CreateThread(function()
         ["getTargetRecords"] = function (_, target)
             local xTarget = ESX.GetPlayerFromId(target)
             if not xTarget then return end
-        
-            local result = MySQL.Sync.fetchAll("SELECT `idban`, `reason`, `created_at`, `type`, `ended_at`, `firstname`, `lastname` FROM `star_adminmenu_records` a INNER JOIN `users` b ON a.staff = b.identifier WHERE `user` = @user ORDER BY `created_at` DESC", {
-              ["@user"] = xTarget.getIdentifier()
+
+            local result = MySQL.query.await("SELECT `idban`, `reason`, `created_at`, `type`, `ended_at`, `firstname`, `lastname` FROM `adminmenu_records` a INNER JOIN `users` b ON a.staff = b.identifier WHERE `user` = ? ORDER BY `created_at` DESC", {
+              xTarget.getIdentifier()
             })
 
             for k, v in pairs(result) do
@@ -165,7 +165,7 @@ CreateThread(function()
 
             for _, item in pairs(itemInventory) do
                 if item.count > 0 then
-                    inventory[#inventory + 1] = { label = item.label, count = item.count } 
+                    inventory[#inventory + 1] = { label = item.label, count = item.count }
                 end
             end
 
@@ -185,102 +185,40 @@ CreateThread(function()
           TaskLeaveVehicle(Target, vehTarget, 0)
         end,
         ["wipe"] = function (source, target)
-            local xTarget = ESX.GetPlayerFromId(target)
-            if not xTarget then return end
+          local xTarget = ESX.GetPlayerFromId(target)
+          if not xTarget then return end
 
-            Functions["addRecord"](source, target, { type = 1, reason = Translations["wipeReason"] })
+          Functions["addRecord"](source, target, { type = 1, reason = Translations["wipeReason"] })
 
-            if Config.WipeScript.billing then
-              MySQL.Sync.execute("DELETE FROM `billing` WHERE `identifier` = @identifier OR `sender` = ?", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.characters then
-              MySQL.Sync.execute("DELETE FROM `characters` WHERE `identifier` = @identifier", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.datastore then
-              MySQL.Sync.execute("DELETE FROM `datastore_data` WHERE `owner` = @owner", {
-                ["@owner"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.bit_driverschool then
-              MySQL.Sync.execute("DELETE FROM `bit_driverschool` WHERE `userIdentifier` = @userIdentifier", {
-                ["@userIdentifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.okokbanking_transactions then
-              MySQL.Sync.execute("DELETE FROM `okokbanking_transactions` WHERE `sender_identifier` = @sender_identifier", {
-                ["@sender_identifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.casino_players then
-              MySQL.Sync.execute("DELETE FROM `casino_players` WHERE `identifier` = @identifier", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.boombox_songs then
-              MySQL.Sync.execute("DELETE FROM `boombox_songs` WHERE `identifier` = @identifier", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.saved_documents then
-              MySQL.Sync.execute("DELETE FROM `saved_documents` WHERE `identifier` = @identifier", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.wasabi_multijob then
-              MySQL.Sync.execute("DELETE FROM `wasabi_multijob` WHERE `identifier` = @identifier", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.jsFourCriminalRecord then
-              MySQL.Sync.execute("DELETE FROM `jsfour_criminalrecord` WHERE `identifier` = @identifier", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
+          local tablesToWipe = {
+              {name = "billing", column = "`identifier` = ? OR `sender` = ?"},
+              {name = "characters", column = "`identifier` = ?"},
+              {name = "datastore_data", column = "`owner` = ?"},
+              {name = "bit_driverschool", column = "`userIdentifier` = ?"},
+              {name = "okokbanking_transactions", column = "`sender_identifier` = ?"},
+              {name = "casino_players", column = "`identifier` = ?"},
+              {name = "boombox_songs", column = "`identifier` = ?"},
+              {name = "saved_documents", column = "`identifier` = ?"},
+              {name = "wasabi_multijob", column = "`identifier` = ?"},
+              {name = "jsfour_criminalrecord", column = "`identifier` = ?"},
+              {name = "jsfour_criminaluserinfo", column = "`identifier` = ?"},
+              {name = "owned_vehicles", column = "`owner` = ?", param = "?"},
+              {name = "society_moneywash", column = "`identifier` = ?"},
+              {name = "s1n_garages", column = "`identifier` = ?"},
+              {name = "users", column = "`identifier` = ?"},
+              {name = "user_licenses", column = "`owner` = ?"},
+              {name = "property_created", column = "`owner` = ?"},
+              {name = "owned_properties", column = "`owner` = ?"}
+          }
 
-              MySQL.Sync.execute("DELETE FROM `jsfour_criminaluserinfo` WHERE `identifier` = @identifier", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.vehicleShop then
-              MySQL.Sync.execute("DELETE FROM `owned_vehicles` WHERE `owner` = @owner", {
-                ["@owner"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.society then
-              MySQL.Sync.execute("DELETE FROM `society_moneywash` WHERE `identifier` = @identifier", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.sinyxGarages then
-              MySQL.Sync.execute("DELETE FROM `s1n_garages` WHERE `identifier` = @identifier", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
-            end
-
-            if Config.WipeScript.ESX then
-              MySQL.Sync.execute("DELETE FROM `users` WHERE `identifier` = @identifier", {
-                ["@identifier"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.Licenses then
-              MySQL.Sync.execute("DELETE FROM `user_licenses` WHERE `owner` = @owner", {
-                ["@owner"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.property_created then
-              MySQL.Sync.execute("DELETE FROM `property_created` WHERE `owner` = @owner", {
-                ["@owner"] = xTarget.getIdentifier()
-              })
-            end
-            if Config.WipeScript.ESXProperty then
-              MySQL.Sync.execute("DELETE FROM `owned_properties` WHERE `owner` = @owner", {
-                ["@owner"] = xTarget.getIdentifier()
-              })
-            end
-        end,
+          for _, table in ipairs(tablesToWipe) do
+              if Config.WipeScript[table.name] then
+                  MySQL.query.await("DELETE FROM `" .. table.name .. "` WHERE " .. table.column, {
+                      xTarget.getIdentifier()
+                  })
+              end
+          end
+      end,
         ["announce"] = function (_, _, data)
             if not data.message then return end
 
