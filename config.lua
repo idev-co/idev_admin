@@ -92,11 +92,11 @@ Config = {
         billing = true, -- wipe billing table ! 
         characters = false, -- wipe characters table !
         datastore = true, -- datastore_data, etcc...
-        dpEmotes = true, -- wipe dpEmotes keybinds table
+        dpEmotes = false, -- wipe dpEmotes keybinds table
         jsFourCriminalRecord = false, -- wipe jsFourCriminalRecord tables
         vehicleShop = true, -- based on the esx_vehicleshop FROM esx-legacy
         society = true, -- based on the esx_society FROM esx-legacy
-        sinyxGarages = true -- based on https://forum.cfx.re/t/esx-qb-core-the-garage-system/4399450
+        sinyxGarages = false -- based on https://forum.cfx.re/t/esx-qb-core-the-garage-system/4399450
 
     },
     functionsBlacklist = { -- Names of groups that don't have access to certain actions, if you set a action to true the group won't have access to this action.
