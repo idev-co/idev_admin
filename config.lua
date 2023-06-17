@@ -68,7 +68,7 @@ Config = {
     },
     discord = { -- webhook must be ENABLE !
         enable = true,
-        webhookURL = "https://discord.com/api/webhooks/992816609720811620/YW4_znbjvDzU1rpPLOmfJkjWQA1Dy80hS3WmMgbeHpVsAA8p-285W0nBI_oBiVnMZUnP",
+        webhookURL = "webhook_link",
         username = "In-Game LOGS",
         color = 15844367,
         title = "Admin menu",
